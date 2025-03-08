@@ -1,30 +1,30 @@
 #!/bin/bash
+#SBATCH -C gpu
+#SBATCH -q debug
+#SBATCH -t 30
+#SBATCH --ntasks-per-node=4
+#SBATCH --cpus-per-task=32
+#SBATCH --gpus-per-node=4
+#SBATCH --image=nersc/pytorch:24.08.01
+#SBATCH --module=gpu,nccl-plugin
 
-# this run script assumes slurm job scheduler, but similar run cmd can be used elsewhere
-# for DDP (slurm vars setting)
 export MASTER_ADDR=$(hostname)
-
-# number of gpus
-ngpu=4
-
-# yaml file
 config_file=./config/operators_poisson.yaml
-# config name to run
 config="poisson-scale-k1_5"
-# sub run number
-run_num="test"
+run_num="00"
 
-# where to store results
-scratch="/path/to/results/"
+# path/to/logs
+results_dir=$SCRATCH/clearml_tests/results
+mkdir -p ${results_dir}
 
-# run command
-cmd="python train.py --yaml_config=$config_file --config=$config --run_num=$run_num --root_dir=$scratch"
+cmd="python train.py --yaml_config=$config_file --config=$config --run_num=$run_num --root_dir=$results_dir"
+srun -l shifter bash -c "source export_DDP_vars.sh && $cmd"
 
-# source DDP vars first for data-parallel training (if not srun, just source and then run cmd; see pytorch docs for DDP)
-srun -l -n $ngpu --cpus-per-task=10 --gpus-per-node $ngpu bash -c "source export_DDP_vars.sh && $cmd"
-
-# for inference run the following commands to use eval.py (single gpu is sufficient, no logging by default)
-# pass the model weights to use
-#weights_for_inference=$scratch/expts/$config/$run_num/checkpoints/ckpt_best.tar
-#cmd_inf="python eval.py --yaml_config=$config_file --config=$config --run_num=$run_num --root_dir=$scratch --weights=$weights_for_inference"
-#bash -c "$cmd_inf"
+# if wandb sweeps
+#sweep_id="e8me2vut"
+#cmd_sweep="python train.py --yaml_config=$config_file --config=$config --run_num=$run_num --root_dir=$results_dir --sweep_id=$sweep_id"
+#srun -u --mpi=pmi2 --nodes=1 --ntasks-per-node=4 --cpus-per-task=32 --gpus-per-node=4 shifter --module gpu --image=${image} \
+#    bash -c "
+#    source export_DDP_vars.sh
+#    $cmd_sweep
+#    "
