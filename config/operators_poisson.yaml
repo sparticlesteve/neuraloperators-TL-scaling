@@ -27,8 +27,8 @@ default: &DEFAULT
   plot_figs: !!bool False
   pack_data: !!bool False
   # Weights & Biases
-  entity: 'your_wandb_entity'
-  project: 'your_wandb_project'
+  entity: 'weatherbenching'
+  project: 'fno-testing'
   log_to_wandb: !!bool False
   distill: !!bool False
   subsample: 1
@@ -41,7 +41,7 @@ poisson: &poisson
   ny: 128
   log_to_wandb: !!bool False
   save_checkpoint: !!bool True
-  max_epochs: 500
+  max_epochs: 32
   scheduler: 'cosine'
   plot_figs: !!bool True
   loss_style: 'sum'
@@ -72,7 +72,7 @@ poisson-scale-k1_5: &poisson_scale_k1_5
   scales_path:   '/mscratch/sd/s/sfarrell/clearml_tests/poisson/train_k1_5_scales.npy'
   batch_size: 128
   valid_batch_size: 128
-  log_to_wandb: !!bool False
+  log_to_wandb: !!bool True
   mode_cut: 32
   embed_cut: 64
   fc_cut: 2
