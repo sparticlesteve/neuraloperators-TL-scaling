@@ -13,8 +13,27 @@ import numpy as np
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 from torch.utils.data.distributed import DistributedSampler
 
+# Try to import ClearML Dataset
+try:
+    from clearml import Dataset as ClearMLDataset
+except ImportError:
+    pass
 
 def get_data_loader(params, location, distributed, train=True, pack=False):
+    # Check if we need to get the dataset from ClearML
+    if hasattr(params, 'clearml_dataset_id') and params.clearml_dataset_id:
+        try:
+            logging.info(f"Fetching ClearML dataset with ID: {params.clearml_dataset_id}")
+            dataset_obj = ClearMLDataset.get(dataset_id=params.clearml_dataset_id)
+            dataset_path = dataset_obj.get_local_copy()
+            logging.info(f"ClearML dataset cached at: {dataset_path}")
+            # Prepend the dataset path to the location
+            location = os.path.join(dataset_path, location)
+            logging.info(f"Using dataset at: {location}")
+        except Exception as e:
+            logging.warning(f"Failed to fetch ClearML dataset: {e}")
+            logging.warning("Continuing with original location path")
+    
     transform = torch.from_numpy
     dataset = PDESolns(params, location, transform, train)
     sampler = DistributedSampler(dataset, shuffle=train) if distributed else None
@@ -76,7 +95,18 @@ class PDESolns(Dataset):
         self.n_samples = int(self.n_samples)
         logging.info("Found data at path {}. Number of examples: {}. Image Shape: {} x {}".format(self.location, self.n_samples, self.img_shape_x, self.img_shape_y))
         if hasattr(self.params, "scales_path"):
-            self.scales = np.load(self.params.scales_path)
+            # Check if scales_path needs to be modified with ClearML dataset path
+            scales_path = self.params.scales_path
+            if hasattr(self.params, 'clearml_dataset_id') and self.params.clearml_dataset_id:
+                try:
+                    dataset_obj = ClearMLDataset.get(dataset_id=self.params.clearml_dataset_id)
+                    dataset_path = dataset_obj.get_local_copy()
+                    if not os.path.isabs(scales_path):
+                        scales_path = os.path.join(dataset_path, scales_path)
+                except Exception as e:
+                    logging.warning(f"Failed to modify scales_path with ClearML dataset path: {e}")
+            
+            self.scales = np.load(scales_path)
             self.scales = np.array([s if s != 0 else 1 for s in self.scales]) 
             self.scales = self.scales.astype('float32')
             measure_x = self.scales[-2] / self.img_shape_x
@@ -111,5 +141,3 @@ class PDESolns(Dataset):
         X = self.transform(X)
         y = self.transform(self.data[local_idx,self.in_channels:])
         return X, y
-
-
