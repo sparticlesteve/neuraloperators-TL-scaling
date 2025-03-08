@@ -24,6 +24,12 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap as ruamelDict
 from collections import OrderedDict
 
+# For ClearML integration
+try:
+    from clearml import Task
+except ImportError:
+    pass
+
 # models
 import models.ffn
 import models.fno
@@ -72,6 +78,7 @@ class Trainer():
         
         self.log_to_screen = params.log_to_screen and self.world_rank==0
         self.log_to_wandb = params.log_to_wandb and self.world_rank==0
+        self.log_to_clearml = params.get('log_to_clearml', False) and self.world_rank==0
         params['name'] = args.config + '_' + args.run_num
         params['group'] = 'op_' + args.config
         if torch.cuda.is_available():
@@ -80,6 +87,7 @@ class Trainer():
             self.device = torch.device('cpu')
         self.params = params
         self.params.device = self.device
+        self.clearml_task = None
 
     def init_exp_dir(self, exp_dir):
         if self.world_rank==0:
@@ -87,6 +95,8 @@ class Trainer():
                 os.makedirs(exp_dir)
                 os.makedirs(os.path.join(exp_dir, 'checkpoints/'))
                 os.makedirs(os.path.join(exp_dir, 'wandb/'))
+                if self.log_to_clearml:
+                    os.makedirs(os.path.join(exp_dir, 'clearml/'))
         self.params['experiment_dir'] = os.path.abspath(exp_dir)
         self.params['checkpoint_path'] = os.path.join(exp_dir, 'checkpoints/ckpt.tar')
         self.params['resuming'] = True if os.path.isfile(self.params.checkpoint_path) else False
@@ -118,6 +128,18 @@ class Trainer():
                 wandb.init(dir=os.path.join(exp_dir, "wandb"),
                            config=self.params.params, name=self.params.name, group=self.params.group, project=self.params.project, 
                            entity=self.params.entity, resume=self.params.resuming)
+            if self.log_to_clearml:
+                try:
+                    self.clearml_task = Task.init(project_name=self.params.get('clearml_project', self.params.project),
+                                                  task_name=self.params.name,
+                                                  #output_uri=os.path.join(exp_dir, "clearml")
+                                                  )
+                    self.clearml_task.connect_configuration(self.params.params)
+                    if self.params.resuming:
+                        self.clearml_task.set_initial_iteration(self.params.get('initial_iteration', 0))
+                except Exception as e:
+                    logging.warning(f"Failed to initialize ClearML: {e}")
+                    self.log_to_clearml = False
             self.build_and_run()
 
 
@@ -260,6 +282,35 @@ class Trainer():
                 self.logs['learning_rate'] = self.optimizer.param_groups[0]['lr']
                 self.logs['time_per_epoch'] = tr_time
                 wandb.log(self.logs, step=self.epoch+1)
+                
+            if self.log_to_clearml and self.clearml_task:
+                try:
+                    # Log metrics to ClearML
+                    self.logs['learning_rate'] = self.optimizer.param_groups[0]['lr']
+                    self.logs['time_per_epoch'] = tr_time
+                    
+                    # Log scalar metrics
+                    for key, value in self.logs.items():
+                        if key != 'vis' and isinstance(value, (int, float)):
+                            self.clearml_task.get_logger().report_scalar(
+                                title=key, 
+                                series='train', 
+                                value=value, 
+                                iteration=self.epoch+1
+                            )
+                    
+                    # Log visualization if available
+                    if plot_figs:
+                        fig = vis_fields(fields, self.params, self.domain)
+                        self.clearml_task.get_logger().report_matplotlib_figure(
+                            title="Visualization",
+                            series="fields",
+                            figure=fig,
+                            iteration=self.epoch+1
+                        )
+                        plt.close(fig)
+                except Exception as e:
+                    logging.warning(f"Failed to log to ClearML: {e}")
 
             if self.log_to_screen:
                 logging.info('Time taken for epoch {} is {} sec; with {}/{} in tr/val'.format(self.epoch+1, time.time()-start, tr_time, val_time))
@@ -269,6 +320,12 @@ class Trainer():
 
         if self.log_to_wandb:
             wandb.finish()
+            
+        if self.log_to_clearml and self.clearml_task:
+            try:
+                self.clearml_task.close()
+            except Exception as e:
+                logging.warning(f"Failed to close ClearML task: {e}")
 
     
     def get_model_wt_norm(self, model):
