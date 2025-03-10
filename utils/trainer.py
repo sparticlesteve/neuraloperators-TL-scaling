@@ -182,6 +182,9 @@ class Trainer():
         self.params['global_valid_batch_size'] = self.params.valid_batch_size
         self.params['local_valid_batch_size'] = int(self.params.valid_batch_size//self.world_size)
 
+        print('All params:')
+        print(self.params)
+
         # dump the yaml used
         if self.world_rank == 0:
             hparams = ruamelDict()
