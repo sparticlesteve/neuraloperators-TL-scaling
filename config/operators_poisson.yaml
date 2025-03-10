@@ -31,7 +31,7 @@ default: &DEFAULT
   project: 'fno-testing'
   clearml_project: 'FNO Tests'
   log_to_wandb: !!bool False
-  log_to_clearml: !!bool True
+  log_to_clearml: !!bool False
   distill: !!bool False
   subsample: 1
 
@@ -75,7 +75,8 @@ poisson-scale-k1_5: &poisson_scale_k1_5
   scales_path:   'train_k1_5_scales.npy'
   batch_size: 128
   valid_batch_size: 128
-  log_to_wandb: !!bool True
+  log_to_wandb: !!bool False
+  log_to_clearml: !!bool True
   mode_cut: 32
   embed_cut: 64
   fc_cut: 2
