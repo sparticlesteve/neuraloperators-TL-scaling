@@ -147,7 +147,8 @@ class Trainer():
                                                   task_name=self.params.name,
                                                   #output_uri=os.path.join(exp_dir, "clearml")
                                                   )
-                    self.clearml_task.connect_configuration(self.params.params)
+                    self.clearml_task.connect(self.params.params)
+                    #self.clearml_task.connect_configuration(self.params.params)
                     #if self.params.resuming:
                     #    self.clearml_task.set_initial_iteration(self.params.get('initial_iteration', 0))
                 except Exception as e:
