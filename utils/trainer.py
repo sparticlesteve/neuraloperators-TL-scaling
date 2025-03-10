@@ -60,6 +60,7 @@ class Trainer():
         self.root_dir = args.root_dir
         self.config = args.config 
         self.run_num = args.run_num
+        print('run_num', self.run_num)
         self.world_size = 1
         if 'WORLD_SIZE' in os.environ:
             self.world_size = int(os.environ['WORLD_SIZE'])
