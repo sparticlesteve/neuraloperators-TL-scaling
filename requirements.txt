@@ -7,3 +7,4 @@ scipy==1.6.3
 torch==1.12.0
 torchvision==0.13.0
 wandb==0.15.3
+clearml
