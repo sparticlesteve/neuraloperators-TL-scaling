@@ -78,7 +78,7 @@ class Trainer():
         
         self.log_to_screen = params.log_to_screen and self.world_rank==0
         self.log_to_wandb = params.log_to_wandb and self.world_rank==0
-        self.log_to_clearml = params.get('log_to_clearml', False) and self.world_rank==0
+        self.log_to_clearml = params.log_to_clearml and self.world_rank==0
         params['name'] = args.config + '_' + args.run_num
         params['group'] = 'op_' + args.config
         if torch.cuda.is_available():
