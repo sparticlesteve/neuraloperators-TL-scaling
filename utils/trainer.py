@@ -66,12 +66,20 @@ class Trainer():
 
         # Dirty workaround for current, specific clearml queue setup
         if 'RANK' not in os.environ and 'NODE_RANK' in os.environ:
+            print('rank not set, but node rank set...')
+            print('implementing rank setting workaround')
             os.environ['RANK'] = os.environ['NODE_RANK']
             os.environ['LOCAL_RANK'] = '0'
+
 
         self.local_rank = 0
         self.world_rank = 0
         if self.world_size > 1:
+            print('Initializing process group')
+            print('WORLD_SIZE', os.environ['WORLD_SIZE'])
+            print('RANK', os.environ['RANK'])
+            print('MASTER_ADDR', os.environ['MASTER_ADDR'])
+            print('MASTER_PORT', os.environ['MASTER_PORT'])
             dist.init_process_group(backend='nccl',
                                     init_method='env://')
             self.world_rank = dist.get_rank()
