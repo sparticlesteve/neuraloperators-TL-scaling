@@ -17,8 +17,15 @@ run_num="00"
 results_dir=$SCRATCH/clearml_tests/results
 mkdir -p ${results_dir}
 
+# Install clearml package
+export PYTHONUSERBASE=".local/clearml_testing_fno"
+shifter bash -c "pip install clearml"
+
 cmd="python train.py --yaml_config=$config_file --config=$config --run_num=$run_num --root_dir=$results_dir"
-srun -l shifter bash -c "source export_DDP_vars.sh && $cmd"
+srun -l shifter bash -c "
+    source export_DDP_vars.sh
+    $cmd
+"
 
 # if wandb sweeps
 #sweep_id="e8me2vut"
