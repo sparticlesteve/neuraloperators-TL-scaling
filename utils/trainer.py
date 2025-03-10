@@ -183,7 +183,7 @@ class Trainer():
         self.params['local_valid_batch_size'] = int(self.params.valid_batch_size//self.world_size)
 
         print('All params:')
-        print(self.params)
+        self.params.log()
 
         # dump the yaml used
         if self.world_rank == 0:
