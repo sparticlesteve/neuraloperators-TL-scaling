@@ -92,7 +92,7 @@ class Trainer():
         
         self.log_to_screen = params.log_to_screen and self.world_rank==0
         self.log_to_wandb = params.log_to_wandb and self.world_rank==0
-        self.log_to_clearml = params.log_to_clearml and self.world_rank==0
+        self.log_to_clearml = params.log_to_clearml #and self.world_rank==0
         params['name'] = args.config + '_' + args.run_num
         params['group'] = 'op_' + args.config
         if torch.cuda.is_available():
@@ -172,8 +172,8 @@ class Trainer():
             self.params = comm.bcast(self.params, root=0)
             self.params.device = self.device # dont broadcast 0s device
 
-        if self.world_rank == 0:
-            logging.info(self.params.log())
+        #if self.world_rank == 0:
+        #    logging.info(self.params.log())
 
         set_seed(self.params, self.world_size)
 
