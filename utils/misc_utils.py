@@ -121,7 +121,9 @@ def compute_grad_norm(p_list):
     grad_norm = 0
     print('compute_grad_norm, looping over parameters')
     for p in p_list:
-        print(p.sum(), p.grad)
+        print(p.sum())
+        if p.grad is None:
+            print(p)
         param_g_norm = p.grad.detach().data.norm(2)
         grad_norm += param_g_norm.item()**2
     grad_norm = grad_norm**0.5
