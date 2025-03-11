@@ -150,6 +150,8 @@ class Trainer():
                                                   )
                     self.clearml_task.connect(self.params.params)
                     #self.clearml_task.connect_configuration(self.params.params)
+                    # Bugfix for clearml handling of YParams object
+                    self.params.update_params(self.params.params)
                     #if self.params.resuming:
                     #    self.clearml_task.set_initial_iteration(self.params.get('initial_iteration', 0))
                 except Exception as e:
