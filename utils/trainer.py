@@ -184,7 +184,6 @@ class Trainer():
         self.params['global_valid_batch_size'] = self.params.valid_batch_size
         self.params['local_valid_batch_size'] = int(self.params.valid_batch_size//self.world_size)
 
-        print('All params:')
         self.params.log()
 
         # dump the yaml used
@@ -258,7 +257,6 @@ class Trainer():
         plot_figs = self.params.plot_figs
 
         for epoch in range(self.startEpoch, self.params.max_epochs):
-            print('Start epoch', epoch)
             self.epoch = epoch
             if dist.is_initialized():
                 # shuffles data before every epoch
@@ -365,7 +363,6 @@ class Trainer():
 
 
     def train_one_epoch(self):
-        print('train_one_epoch')
         tr_time = 0
         self.model.train()
 
@@ -380,7 +377,6 @@ class Trainer():
 
 
         for i, (inputs, targets) in enumerate(self.train_data_loader):
-            print('iter', i)
             self.iters += 1
             data_start = time.time()
             if not self.params.pack_data: # send to gpu if not already packed in the dataloader
@@ -389,21 +385,14 @@ class Trainer():
 
             self.model.zero_grad()
             u = self.model(inputs)
-            print('model output sum:', u.sum())
 
             loss_data = self.loss_func.data(inputs, u, targets)
             loss_pde = self.loss_func.pde(inputs, u, targets)
             loss_bc = self.loss_func.bc(inputs, u, targets)
             loss = loss_data + loss_bc + loss_pde
-            print('loss_data', loss_data.sum())
-            print('loss_pde', loss_pde.sum())
-            print('loss_bc', loss_bc.sum())
-            print('loss', loss.sum())
 
             loss.backward()
-            print('loss', loss.sum())
             self.optimizer.step()
-            print('loss', loss.sum())
 
             grad_norm = compute_grad_norm(self.model.parameters())
             tr_err = l2_err(u.detach(), targets.detach())
