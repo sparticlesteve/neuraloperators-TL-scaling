@@ -395,6 +395,10 @@ class Trainer():
             loss_pde = self.loss_func.pde(inputs, u, targets)
             loss_bc = self.loss_func.bc(inputs, u, targets)
             loss = loss_data + loss_bc + loss_pde
+            print('loss_data', loss_data.sum())
+            print('loss_pde', loss_pde.sum())
+            print('loss_bc', loss_bc.sum())
+            print('loss', loss.sum())
 
             loss.backward()
             self.optimizer.step()
