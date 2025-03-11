@@ -63,7 +63,7 @@ poisson: &poisson
 
   optimizer: 'adam'
 
-  lr: 1E-3
+  lr: !!float 1.0E-3
   pack_data: !!bool False
 
 poisson-scale-k1_5: &poisson_scale_k1_5
