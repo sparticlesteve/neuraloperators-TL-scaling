@@ -1,4 +1,4 @@
-from ruamel.yaml import YAML
+import yaml
 import logging
 
 class YParams():
@@ -12,8 +12,8 @@ class YParams():
       print("------------------ Configuration ------------------")
 
     with open(yaml_filename) as _file:
-
-      for key, val in YAML().load(_file)[config_name].items():
+      config_data = yaml.safe_load(_file)
+      for key, val in config_data[config_name].items():
         if print_params: print(key, val)
         if val =='None': val = None
 
