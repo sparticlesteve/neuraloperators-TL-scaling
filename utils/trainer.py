@@ -188,7 +188,6 @@ class Trainer():
         self.params.log()
 
         # dump the yaml used
-        print('dumping yaml', self.params['lr'], self.params.lr)
         if self.world_rank == 0:
             hparams = ruamelDict()
             yaml = YAML()
@@ -259,6 +258,7 @@ class Trainer():
         plot_figs = self.params.plot_figs
 
         for epoch in range(self.startEpoch, self.params.max_epochs):
+            print('Start epoch', epoch)
             self.epoch = epoch
             if dist.is_initialized():
                 # shuffles data before every epoch
@@ -365,6 +365,7 @@ class Trainer():
 
 
     def train_one_epoch(self):
+        print('train_one_epoch')
         tr_time = 0
         self.model.train()
 
@@ -379,6 +380,7 @@ class Trainer():
 
 
         for i, (inputs, targets) in enumerate(self.train_data_loader):
+            print('iter', i)
             self.iters += 1
             data_start = time.time()
             if not self.params.pack_data: # send to gpu if not already packed in the dataloader
@@ -387,6 +389,7 @@ class Trainer():
 
             self.model.zero_grad()
             u = self.model(inputs)
+            print('model output sum:', u.sum())
 
             loss_data = self.loss_func.data(inputs, u, targets)
             loss_pde = self.loss_func.pde(inputs, u, targets)
