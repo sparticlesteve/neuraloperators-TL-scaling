@@ -19,6 +19,7 @@ def set_scheduler(args, optimizer):
 def set_optimizer(args, net):
     """ set the optimizer """
     if args.optimizer == "adam":
+        print('Setting up Adam optimizer with lr', args.lr)
         optimizer = optim.Adam(net.parameters(), lr=args.lr)
     elif args.optimizer == "sgd":
         optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9)    

@@ -194,6 +194,7 @@ class Trainer():
             with open(os.path.join(self.params['experiment_dir'], 'hyperparams.yaml'), 'w') as hpfile:
                 yaml.dump(hparams,  hpfile )
 
+        print('Creating data loaders')
         self.train_data_loader, self.train_dataset, self.train_sampler = get_data_loader(self.params, self.params.train_path, dist.is_initialized(), train=True, pack=self.params.pack_data)
         self.val_data_loader, self.val_dataset, self.valid_sampler = get_data_loader(self.params, self.params.val_path, dist.is_initialized(), train=False, pack=self.params.pack_data)
 
@@ -213,8 +214,10 @@ class Trainer():
 
 
 
+        print('Calling set_optimizer')
         self.optimizer = set_optimizer(self.params, self.model)
 
+        print('Calling set_scheduler')
         self.scheduler = set_scheduler(self.params, self.optimizer)
 
         if self.params.loss_func == "mse":
