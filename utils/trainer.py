@@ -401,7 +401,9 @@ class Trainer():
             print('loss', loss.sum())
 
             loss.backward()
+            print('loss', loss.sum())
             self.optimizer.step()
+            print('loss', loss.sum())
 
             grad_norm = compute_grad_norm(self.model.parameters())
             tr_err = l2_err(u.detach(), targets.detach())
