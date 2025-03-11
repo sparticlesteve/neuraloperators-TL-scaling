@@ -120,13 +120,15 @@ def normalize(x):
 def compute_grad_norm(p_list):
     grad_norm = 0
     print('compute_grad_norm, looping over parameters')
-    for p in p_list:
-        print(p.sum())
+    for i, p in enumerate(p_list):
         if p.grad is None:
-            print(p)
+            print('Found parameter with no gradient')
+            print(i, p.sum())
+            continue
         param_g_norm = p.grad.detach().data.norm(2)
         grad_norm += param_g_norm.item()**2
     grad_norm = grad_norm**0.5
+    print(f'Computed grad norm over {i+1} parameters')
     return grad_norm
 
 def l2_err(pred, target):
