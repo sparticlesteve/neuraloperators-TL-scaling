@@ -186,7 +186,7 @@ class Trainer():
         self.params.log()
 
         # dump the yaml used
-        print('dumping yaml', self.params.lr)
+        print('dumping yaml', self.params['lr'], self.params.lr)
         if self.world_rank == 0:
             hparams = ruamelDict()
             yaml = YAML()
@@ -195,22 +195,18 @@ class Trainer():
             with open(os.path.join(self.params['experiment_dir'], 'hyperparams.yaml'), 'w') as hpfile:
                 yaml.dump(hparams,  hpfile )
 
-        print('Creating data loaders', self.params.lr)
         self.train_data_loader, self.train_dataset, self.train_sampler = get_data_loader(self.params, self.params.train_path, dist.is_initialized(), train=True, pack=self.params.pack_data)
         self.val_data_loader, self.val_dataset, self.valid_sampler = get_data_loader(self.params, self.params.val_path, dist.is_initialized(), train=False, pack=self.params.pack_data)
 
         # domain grid
-        print('Creating domain', self.params.lr)
         self.domain = DomainXY(self.params)
 
         
-        print('Constructing model', self.params.lr)
         if self.params.model == 'fno':
             self.model = models.fno.fno(self.params).to(self.device)
         else:
             assert(False), "Error, model arch invalid."
 
-        print('Wrapping in DDP', self.params.lr)
         if dist.is_initialized():
             self.model = DistributedDataParallel(self.model,
                                                 device_ids=[self.local_rank],
@@ -218,10 +214,8 @@ class Trainer():
 
 
 
-        print('Calling set_optimizer', self.params.lr)
         self.optimizer = set_optimizer(self.params, self.model)
 
-        print('Calling set_scheduler', self.params.lr)
         self.scheduler = set_scheduler(self.params, self.optimizer)
 
         if self.params.loss_func == "mse":
