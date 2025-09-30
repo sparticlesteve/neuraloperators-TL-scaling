@@ -146,6 +146,7 @@ class Trainer():
                 try:
                     # If running in a task, we can just retrieve it
                     current_task = Task.current_task()
+                    logging.info(f"ClearML current task: {current_task}")
                     if current_task:
                         self.clearml_task = current_task
                     # If not in a task, create from rank 0 only
@@ -157,6 +158,7 @@ class Trainer():
                         )
                     # If we have a task, we should connect/retrieve config
                     if self.clearml_task:
+                        logging.info(f"Connecting configuration")
                         self.clearml_task.connect(self.params.params)
                         #self.clearml_task.connect_configuration(self.params.params)
                         # Bugfix for clearml handling of YParams object

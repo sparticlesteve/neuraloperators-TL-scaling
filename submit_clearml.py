@@ -35,9 +35,15 @@ def main():
         script="./run_clearml.sh",
     )
 
+    # Override some hyperparameters
+    task.set_parameters({
+        "Args/run_num": 12,
+        "lr": 0.01,
+    })
+
     # SLURM job settings
     task.set_user_properties(
-        num_nodes=1,
+        num_nodes=2,
     )
 
     # Print the configuration
