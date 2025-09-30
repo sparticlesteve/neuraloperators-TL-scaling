@@ -33,4 +33,4 @@ launch_cmd="torchrun --nnodes=$SLURM_JOB_NUM_NODES --nproc-per-node=${SLURM_GPUS
 script_cmd="train.py --yaml_config=$config_file --config=$config --run_num=$run_num --root_dir=$results_dir"
 
 shifter --image=$SHIFTER_IMAGE --module=$SHIFTER_MODULES \
-    bash -c "$launch_cmd $cmd"
+    bash -c "$launch_cmd $script_cmd"
