@@ -1,0 +1,57 @@
+"""ClearML SDK submission of training job"""
+
+import pprint
+
+import clearml
+from clearml import Task
+
+
+def get_task_summary(task: Task) -> Dict[str, Any]:
+    summary = dict(
+        id=task.id,
+        task_type=task.task_type,
+        project=task.get_project_name(),
+        name=task.name,
+        status=task.get_status(),
+        tags=list(task.get_tags() or []),
+        # parameters=task.get_parameters(),
+        parameters=task.get_parameters_as_dict(),
+        user_properties=task.get_user_properties(),
+        script=task.get_script(),
+    )
+    return summary
+
+
+def main():
+
+    # Starting with hardcoded configuration
+    task = Task.create(
+        task_name="poisson-scale-k1-test",
+        project_name="FNO Tests",
+        task_type="training",
+        repo="https://github.com/sparticlesteve/neuraloperators-TL-scaling.git",
+        branch="clearml-testing",
+        binary="/bin/bash",
+        script="./run_clearml.sh",
+    )
+
+    # SLURM job settings
+    task.set_user_properties(
+        num_nodes=1,
+    )
+
+    # Print the configuration
+    print("\nCREATED NEW TASK:")
+    pprint.pprint(get_task_summary(new_task))
+
+    # Enqueue the task
+    enqueue_response = Task.enqueue(
+        task=new_task,
+        queue_name="muller",
+    )
+
+    print("\nTASK ENQUEUED:")
+    pprint.pprint(enqueue_response)
+
+if __name__ == "__main__":
+    main()
