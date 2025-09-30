@@ -1,6 +1,7 @@
 """ClearML SDK submission of training job"""
 
 import pprint
+from typing import Dict, Any
 
 import clearml
 from clearml import Task
@@ -14,7 +15,6 @@ def get_task_summary(task: Task) -> Dict[str, Any]:
         name=task.name,
         status=task.get_status(),
         tags=list(task.get_tags() or []),
-        # parameters=task.get_parameters(),
         parameters=task.get_parameters_as_dict(),
         user_properties=task.get_user_properties(),
         script=task.get_script(),
@@ -42,11 +42,11 @@ def main():
 
     # Print the configuration
     print("\nCREATED NEW TASK:")
-    pprint.pprint(get_task_summary(new_task))
+    pprint.pprint(get_task_summary(task))
 
     # Enqueue the task
     enqueue_response = Task.enqueue(
-        task=new_task,
+        task=task,
         queue_name="muller",
     )
 
