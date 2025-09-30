@@ -144,21 +144,29 @@ class Trainer():
                            entity=self.params.entity, resume=self.params.resuming)
             if self.log_to_clearml:
                 try:
-                    self.clearml_task = Task.init(project_name=self.params.clearml_project,
-                                                  task_name=self.params.name,
-                                                  #output_uri=os.path.join(exp_dir, "clearml")
-                                                  )
-                    self.clearml_task.connect(self.params.params)
-                    #self.clearml_task.connect_configuration(self.params.params)
-                    # Bugfix for clearml handling of YParams object
-                    self.params.update_params(self.params.params)
-                    #if self.params.resuming:
-                    #    self.clearml_task.set_initial_iteration(self.params.get('initial_iteration', 0))
+                    # If running in a task, we can just retrieve it
+                    current_task = Task.current_task()
+                    if current_task:
+                        self.clearml_task = current_task
+                    # If not in a task, create from rank 0 only
+                    elif self.world_rank==0:
+                        self.clearml_task = Task.init(
+                            project_name=self.params.clearml_project,
+                            task_name=self.params.name,
+                            #output_uri=os.path.join(exp_dir, "clearml")
+                        )
+                    # If we have a task, we should connect/retrieve config
+                    if self.clearml_task:
+                        self.clearml_task.connect(self.params.params)
+                        #self.clearml_task.connect_configuration(self.params.params)
+                        # Bugfix for clearml handling of YParams object
+                        self.params.update_params(self.params.params)
+                        #if self.params.resuming:
+                        #    self.clearml_task.set_initial_iteration(self.params.get('initial_iteration', 0))
                 except Exception as e:
                     logging.warning(f"Failed to initialize ClearML: {e}")
                     self.log_to_clearml = False
             self.build_and_run()
-
 
 
     def build_and_run(self):
