@@ -9,6 +9,9 @@ set -ex
 SHIFTER_IMAGE=nersc/pytorch:24.08.01
 SHIFTER_MODULES=gpu,nccl-plugin
 
+# Unset ClearML agent's python setup
+unset PYTHONPATH
+
 # Distributed training configuration
 export MASTER_ADDR=$(scontrol show hostnames | head -n 1)
 export MASTER_PORT=29507
