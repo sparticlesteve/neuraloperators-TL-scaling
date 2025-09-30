@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Dump entire env for testing
-env
+env | grep CLEARML
 
 set -ex
 
@@ -23,9 +23,11 @@ mkdir -p ${results_dir}
 
 # Install clearml package in local directory
 export PYTHONUSERBASE=".local/clearml_testing_fno"
-shifter bash -c "pip install clearml"
+shifter --image=$SHIFTER_IMAGE --module=$SHIFTER_MODULES \
+    bash -c "pip install clearml"
 
 launch_cmd="torchrun --nnodes=$SLURM_JOB_NUM_NODES --nproc-per-node=${SLURM_GPUS_PER_TASK:-4} --rdzv-backend=c10d --rdzv-endpoint=$MASTER_ADDR:$MASTER_PORT" 
 script_cmd="train.py --yaml_config=$config_file --config=$config --run_num=$run_num --root_dir=$results_dir"
 
-shifter bash -c "$launch_cmd $cmd"
+shifter --image=$SHIFTER_IMAGE --module=$SHIFTER_MODULES \
+    bash -c "$launch_cmd $cmd"
