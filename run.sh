@@ -11,7 +11,7 @@
 export MASTER_ADDR=$(hostname)
 config_file=./config/operators_poisson.yaml
 config="poisson-scale-k1_5"
-run_num="02"
+run_num=$SLURM_JOB_ID
 
 # path/to/logs
 results_dir=$SCRATCH/clearml_tests/results
