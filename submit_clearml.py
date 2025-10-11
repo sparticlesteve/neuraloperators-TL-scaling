@@ -30,7 +30,8 @@ def main():
         project_name="FNO Tests",
         task_type="training",
         repo="https://github.com/sparticlesteve/neuraloperators-TL-scaling.git",
-        branch="clearml-testing",
+        commit="841d0a787bb665f85935a0e305be983a872d2148",
+        #branch="clearml-testing",
         binary="/bin/bash",
         script="./run_clearml.sh",
     )
