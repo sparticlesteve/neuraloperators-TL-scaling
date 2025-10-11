@@ -55,8 +55,8 @@ def main():
         objective_metric_title="val_loss",
         objective_metric_series="train",
         objective_metric_sign="min",
-        max_number_of_concurrent_tasks=2,
-        total_max_jobs=2,
+        max_number_of_concurrent_tasks=8,
+        total_max_jobs=8,
         # The queue to execute the tasks on
         execution_queue="muller",
     )
