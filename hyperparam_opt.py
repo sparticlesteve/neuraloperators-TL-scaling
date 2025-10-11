@@ -52,11 +52,12 @@ def main():
             UniformParameterRange("General/lr", min_value=1e-5, max_value=1e-2),
             DiscreteParameterRange("General/max_epochs", values=[32]),
         ],
-        objective_metric_title="val_loss",
+        objective_metric_title="best_val_err",
         objective_metric_series="train",
         objective_metric_sign="min",
         max_number_of_concurrent_tasks=8,
         total_max_jobs=8,
+        save_top_k_tasks_only=2,
         # The queue to execute the tasks on
         execution_queue="muller",
     )
