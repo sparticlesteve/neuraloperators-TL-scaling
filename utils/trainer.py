@@ -64,14 +64,6 @@ class Trainer():
         if 'WORLD_SIZE' in os.environ:
             self.world_size = int(os.environ['WORLD_SIZE'])
 
-        ## Dirty workaround for current, specific clearml queue setup
-        #if 'RANK' not in os.environ and 'NODE_RANK' in os.environ:
-        #    print('rank not set, but node rank set...')
-        #    print('implementing rank setting workaround')
-        #    os.environ['RANK'] = os.environ['NODE_RANK']
-        #    os.environ['LOCAL_RANK'] = '0'
-
-
         self.local_rank = 0
         self.world_rank = 0
         if self.world_size > 1:
