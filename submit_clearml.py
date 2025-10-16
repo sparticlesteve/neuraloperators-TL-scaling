@@ -26,8 +26,8 @@ def main():
 
     # Starting with hardcoded configuration
     task = Task.create(
-        task_name="poisson-scale-k1-test",
         project_name="FNO Tests",
+        task_name="poisson-scale-k1-test",
         task_type="training",
         repo="https://github.com/sparticlesteve/neuraloperators-TL-scaling.git",
         commit="41187761bcc974801fe5ca1e9d47b9175c4cf77a",
