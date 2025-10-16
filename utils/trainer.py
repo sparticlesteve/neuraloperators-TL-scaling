@@ -60,17 +60,16 @@ class Trainer():
         self.root_dir = args.root_dir
         self.config = args.config 
         self.run_num = args.run_num
-        print('run_num', self.run_num)
         self.world_size = 1
         if 'WORLD_SIZE' in os.environ:
             self.world_size = int(os.environ['WORLD_SIZE'])
 
-        # Dirty workaround for current, specific clearml queue setup
-        if 'RANK' not in os.environ and 'NODE_RANK' in os.environ:
-            print('rank not set, but node rank set...')
-            print('implementing rank setting workaround')
-            os.environ['RANK'] = os.environ['NODE_RANK']
-            os.environ['LOCAL_RANK'] = '0'
+        ## Dirty workaround for current, specific clearml queue setup
+        #if 'RANK' not in os.environ and 'NODE_RANK' in os.environ:
+        #    print('rank not set, but node rank set...')
+        #    print('implementing rank setting workaround')
+        #    os.environ['RANK'] = os.environ['NODE_RANK']
+        #    os.environ['LOCAL_RANK'] = '0'
 
 
         self.local_rank = 0
@@ -154,18 +153,16 @@ class Trainer():
                         self.clearml_task = Task.init(
                             project_name=self.params.clearml_project,
                             task_name=self.params.name,
-                            #output_uri=os.path.join(exp_dir, "clearml")
                         )
                         logging.info(f"Initialized ClearML task: {self.clearml_task}")
                     # If we have a task, we should connect/retrieve config
                     if self.clearml_task:
                         logging.info(f"Connecting ClearML configuration")
                         self.clearml_task.connect(self.params.params)
-                        #self.clearml_task.connect_configuration(self.params.params)
                         # Bugfix for clearml handling of YParams object
                         self.params.update_params(self.params.params)
-                        #if self.params.resuming:
-                        #    self.clearml_task.set_initial_iteration(self.params.get('initial_iteration', 0))
+                        if self.params.resuming:
+                            self.clearml_task.set_initial_iteration(self.params.get('initial_iteration', 0))
                 except Exception as e:
                     logging.warning(f"Failed to initialize ClearML: {e}")
                     self.log_to_clearml = False
@@ -185,9 +182,6 @@ class Trainer():
             self.params = comm.bcast(self.params, root=0)
             self.params.device = self.device # dont broadcast 0s device
 
-        #if self.world_rank == 0:
-        #    logging.info(self.params.log())
-
         set_seed(self.params, self.world_size)
 
         self.params['global_batch_size'] = self.params.batch_size
@@ -195,7 +189,8 @@ class Trainer():
         self.params['global_valid_batch_size'] = self.params.valid_batch_size
         self.params['local_valid_batch_size'] = int(self.params.valid_batch_size//self.world_size)
 
-        self.params.log()
+        if self.world_rank == 0:
+            logging.info(self.params.log())
 
         # dump the yaml used
         if self.world_rank == 0:
