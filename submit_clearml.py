@@ -30,7 +30,7 @@ def main():
         project_name="FNO Tests",
         task_type="training",
         repo="https://github.com/sparticlesteve/neuraloperators-TL-scaling.git",
-        commit="841d0a787bb665f85935a0e305be983a872d2148",
+        commit="41187761bcc974801fe5ca1e9d47b9175c4cf77a",
         #branch="clearml-testing",
         binary="/bin/bash",
         script="./run_clearml.sh",
@@ -39,7 +39,7 @@ def main():
     # Override some hyperparameters
     task.set_parameters({
         "Args/run_num": 12,
-        "lr": 0.01,
+        "lr": 0.001,
     })
 
     # SLURM job settings
