@@ -32,17 +32,6 @@ def main():
 
     # Base task for the hyperparameter optimization
     base_task = Task.get_task(task_id="a1ab901fc0474a0cabf8f34bffe688f1")
-    #base_task = Task.create(
-    #    task_name="poisson-scale-k1-hyperparam",
-    #    project_name="FNO Tests",
-    #    task_type="training",
-    #    repo="https://github.com/sparticlesteve/neuraloperators-TL-scaling.git",
-    #    branch="clearml-testing",
-    #    binary="/bin/bash",
-    #    script="./run_clearml.sh",
-    #    # Specify the configuration to use
-    #    #args=["--config", "poisson-scale-k1_5"],
-    #)
 
     # Define the hyperparameter search space
     print("Constructing HyperParameterOptimizer")

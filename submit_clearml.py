@@ -40,6 +40,7 @@ def main():
     task.set_parameters({
         "Args/run_num": 12,
         "lr": 0.001,
+        "max_epochs": 4,
     })
 
     # SLURM job settings
