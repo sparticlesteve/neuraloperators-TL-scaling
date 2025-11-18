@@ -340,6 +340,7 @@ class Trainer():
             
         if self.log_to_clearml and self.clearml_task:
             try:
+                logging.info("Closing the ClearML task")
                 self.clearml_task.close()
             except Exception as e:
                 logging.warning(f"Failed to close ClearML task: {e}")
