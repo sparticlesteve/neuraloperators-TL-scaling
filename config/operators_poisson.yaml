@@ -68,10 +68,17 @@ poisson: &poisson
 
 poisson-scale-k1_5: &poisson_scale_k1_5
   <<: *poisson
-  train_path:    '/mscratch/sd/s/sfarrell/clearml_tests/poisson/train_k1_5_32k.h5'
-  val_path:      '/mscratch/sd/s/sfarrell/clearml_tests/poisson/val_k1_5_4k.h5'
-  test_path:     '/mscratch/sd/s/sfarrell/clearml_tests/poisson/test_k1_5_4k.h5'
-  scales_path:   '/mscratch/sd/s/sfarrell/clearml_tests/poisson/train_k1_5_scales.npy'
+  # Currently hardcoding for ClearML dasml execution; needs improvement;
+  # Could maybe use a base path that can be overriden via env variable,
+  # Or use a specific container mount path like /data
+  train_path:    '/mscratch/sd/d/dasml/data/poisson/train_k1_5_32k.h5'
+  val_path:      '/mscratch/sd/d/dasml/data/poisson/val_k1_5_4k.h5'
+  test_path:     '/mscratch/sd/d/dasml/data/poisson/test_k1_5_4k.h5'
+  scales_path:   '/mscratch/sd/d/dasml/data/poisson/train_k1_5_scales.npy'
+  #train_path:    '/mscratch/sd/s/sfarrell/clearml_tests/poisson/train_k1_5_32k.h5'
+  #val_path:      '/mscratch/sd/s/sfarrell/clearml_tests/poisson/val_k1_5_4k.h5'
+  #test_path:     '/mscratch/sd/s/sfarrell/clearml_tests/poisson/test_k1_5_4k.h5'
+  #scales_path:   '/mscratch/sd/s/sfarrell/clearml_tests/poisson/train_k1_5_scales.npy'
   #clearml_dataset_id: '5460a4e0e9014632aa35b6d0f503e318'
   #train_path:    'train_k1_5_32k.h5'
   #val_path:      'val_k1_5_4k.h5'
