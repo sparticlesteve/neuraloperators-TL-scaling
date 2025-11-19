@@ -338,12 +338,12 @@ class Trainer():
         if self.log_to_wandb:
             wandb.finish()
             
-        if self.log_to_clearml and self.clearml_task:
-            try:
-                logging.info("Closing the ClearML task")
-                self.clearml_task.close()
-            except Exception as e:
-                logging.warning(f"Failed to close ClearML task: {e}")
+        #if self.log_to_clearml and self.clearml_task:
+        #    try:
+        #        logging.info("Closing the ClearML task")
+        #        self.clearml_task.close()
+        #    except Exception as e:
+        #        logging.warning(f"Failed to close ClearML task: {e}")
 
     
     def get_model_wt_norm(self, model):
