@@ -135,11 +135,10 @@ class Trainer():
                            entity=self.params.entity, resume=self.params.resuming)
             if self.log_to_clearml:
                 try:
-                    # If running in a task, we can just retrieve it
-                    task_id = os.environ.get("CLEARML_TASK_ID")
-                    if task_id is not None:
-                        self.clearml_task = Task.get_task(task_id=task_id)
-                        logging.info(f"ClearML current task: {self.clearml_task}")
+                    # If running in a task, we retrieve it
+                    self.clearml_task = Task.current_task()
+                    if self.clearml_task:
+                        logging.info(f"Retrieved ClearML current task: {self.clearml_task}")
                     # If not in a task, create from rank 0 only
                     elif self.world_rank==0:
                         self.clearml_task = Task.init(
