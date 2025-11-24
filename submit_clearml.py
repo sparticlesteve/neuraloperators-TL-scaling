@@ -52,7 +52,7 @@ def main():
     task.set_parameters({
         "Args/yaml_config": "./config/operators_poisson.yaml",
         "Args/config": "poisson-scale-k1_5",
-        "Args/run_num": 13,
+        "Args/run_num": 1,
         #"Args/root_dir": "",
         "lr": 0.001,
         "max_epochs": 4,
