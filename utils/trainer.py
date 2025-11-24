@@ -155,6 +155,8 @@ class Trainer():
                         self.params.update_params(self.params.params)
                         if self.params.resuming:
                             self.clearml_task.set_initial_iteration(self.params.get('initial_iteration', 0))
+                        # Workaround for experiment_dir being overwritten by clearml
+                        self.params['experiment_dir'] = os.path.abspath(exp_dir)
                 except Exception as e:
                     logging.warning(f"Failed to initialize ClearML: {e}")
                     self.log_to_clearml = False
