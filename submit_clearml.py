@@ -57,6 +57,8 @@ def main():
         docker="nersc/pytorch:24.08.01",
         docker_bash_setup_script=container_setup_script,
         script="train.py",
+        # Pin clearml: newer versions pull numpy 2.x, which breaks the image's torch (built for numpy 1.x)
+        packages=["clearml==2.0.2"],
         #binary="/bin/bash",
         #script="./run_clearml.sh",
     )
