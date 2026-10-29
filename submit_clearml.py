@@ -25,6 +25,7 @@ def get_task_summary(task: Task) -> Dict[str, Any]:
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--project", default="SC26 demo-dev/FNO")
     parser.add_argument("--queue", default="muller")
     parser.add_argument("--task-name", default="poisson-scale-k1-pod")
     parser.add_argument("--max-epochs", type=int, default=4)
@@ -49,7 +50,7 @@ def main():
 
     # Starting with hardcoded configuration
     task = Task.create(
-        project_name="FNO Tests",
+        project_name=args.project,
         task_name=args.task_name,
         task_type="training",
         repo="https://github.com/sparticlesteve/neuraloperators-TL-scaling.git",

@@ -47,6 +47,7 @@ def parse_args():
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base-task-id", default="a1ab901fc0474a0cabf8f34bffe688f1")
     parser.add_argument("--task-name", default="poisson-scale HPO")
+    parser.add_argument("--project", default="SC26 demo-dev/FNO")
     parser.add_argument("--queue", default="muller")
     parser.add_argument("--max-epochs", type=int, default=32)
     parser.add_argument("--uniform", nargs=3, action="append", default=[],
@@ -91,7 +92,7 @@ def main():
 
     # Initialize the HPO task
     task = Task.init(
-        project_name="FNO Tests",
+        project_name=args.project,
         task_name=args.task_name,
         task_type=Task.TaskTypes.optimizer,
         tags=args.tags,
