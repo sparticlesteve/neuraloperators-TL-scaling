@@ -34,7 +34,33 @@ def parse_args():
     parser.add_argument("--total-jobs", type=int, default=8)
     parser.add_argument("--max-concurrent", type=int, default=8)
     parser.add_argument("--top-k", type=int, default=2)
+    parser.add_argument("--optimizer", choices=["random", "optuna", "bohb"], default="random",
+                        help="Search strategy; optuna (TPE + median pruning) and bohb stop poor trials early")
+    parser.add_argument("--min-iters", type=int, default=3,
+                        help="Early stopping: minimum epochs before a trial can be pruned")
+    parser.add_argument("--poll-min", type=float, default=None,
+                        help="Controller polling period in minutes (default 2.0 for random, 0.2 otherwise)")
     return parser.parse_args()
+
+
+def get_optimizer_settings(args):
+    """Return (optimizer_class, extra kwargs) for the chosen search strategy."""
+    if args.optimizer == "random":
+        from clearml.automation import RandomSearch
+        return RandomSearch, {}
+    # Early stopping strategies: objective is reported once per epoch (iterations 1..max_epochs).
+    # max_iteration_per_job is one past the last epoch so finished trials complete instead of being aborted.
+    kwargs = dict(max_iteration_per_job=args.max_epochs + 1, min_iteration_per_job=args.min_iters)
+    if args.optimizer == "optuna":
+        import optuna
+        from clearml.automation.optuna import OptimizerOptuna
+        # Median pruning against completed trials at the same epoch
+        kwargs["optuna_pruner"] = optuna.pruners.MedianPruner(
+            n_startup_trials=2, n_warmup_steps=args.min_iters)
+        return OptimizerOptuna, kwargs
+    from clearml.automation.hpbandster import OptimizerBOHB
+    kwargs["eta"] = 3
+    return OptimizerBOHB, kwargs
 
 
 def main():
@@ -50,8 +76,12 @@ def main():
     # Base task for the hyperparameter optimization
     base_task = Task.get_task(task_id=args.base_task_id)
 
+    optimizer_class, optimizer_kwargs = get_optimizer_settings(args)
+    if args.poll_min is None:
+        args.poll_min = 2.0 if args.optimizer == "random" else 0.2
+
     # Define the hyperparameter search space
-    print("Constructing HyperParameterOptimizer")
+    print(f"Constructing HyperParameterOptimizer ({optimizer_class.__name__})")
     optimizer = HyperParameterOptimizer(
         base_task_id=base_task.id,
         hyper_parameters=[
@@ -66,6 +96,9 @@ def main():
         save_top_k_tasks_only=args.top_k,
         # The queue to execute the tasks on
         execution_queue=args.queue,
+        optimizer_class=optimizer_class,
+        pool_period_min=args.poll_min,
+        **optimizer_kwargs,
     )
 
     # Start the optimization process
