@@ -1,5 +1,6 @@
 """ClearML SDK submission of training job"""
 
+import argparse
 import pprint
 from typing import Dict, Any
 
@@ -22,10 +23,22 @@ def get_task_summary(task: Task) -> Dict[str, Any]:
     return summary
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--queue", default="muller")
+    parser.add_argument("--task-name", default="poisson-scale-k1-pod")
+    parser.add_argument("--max-epochs", type=int, default=4)
+    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--num-nodes", type=int, default=2)
+    parser.add_argument("--tags", nargs="*", default=[])
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
 
     # Job config
-    num_nodes = 2
+    num_nodes = args.num_nodes
     ntasks_per_node = 4
     cpus_per_task = 32
     container_setup_script = """
@@ -37,7 +50,7 @@ def main():
     # Starting with hardcoded configuration
     task = Task.create(
         project_name="FNO Tests",
-        task_name="poisson-scale-k1-pod",
+        task_name=args.task_name,
         task_type="training",
         repo="https://github.com/sparticlesteve/neuraloperators-TL-scaling.git",
         branch="clearml-testing",
@@ -54,9 +67,11 @@ def main():
         "Args/config": "poisson-scale-k1_5",
         "Args/run_num": 1,
         #"Args/root_dir": "",
-        "lr": 0.001,
-        "max_epochs": 4,
+        "lr": args.lr,
+        "max_epochs": args.max_epochs,
     })
+    if args.tags:
+        task.add_tags(args.tags)
 
     # SLURM job settings
     task.set_user_properties(
@@ -72,7 +87,7 @@ def main():
     # Enqueue the task
     enqueue_response = Task.enqueue(
         task=task,
-        queue_name="experimental",
+        queue_name=args.queue,
     )
 
     print("\nTASK ENQUEUED:")
