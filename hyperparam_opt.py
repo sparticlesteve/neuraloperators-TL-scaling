@@ -45,7 +45,8 @@ def job_complete_callback(
 def parse_args():
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--base-task-id", default="a1ab901fc0474a0cabf8f34bffe688f1")
+    parser.add_argument("--base-task-id", required=True,
+                        help="task to clone for each trial (e.g. the 2-epoch base in the project)")
     parser.add_argument("--task-name", default="poisson-scale HPO")
     parser.add_argument("--project", default="SC26 demo-dev/FNO")
     parser.add_argument("--queue", default="muller")
