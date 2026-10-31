@@ -15,6 +15,7 @@ import argparse
 import json
 import math
 import random
+import time
 
 from clearml import Task
 from clearml.automation import (
@@ -37,6 +38,12 @@ def job_complete_callback(
     job_parameters,         # type: dict
     top_performance_job_id  # type: str
 ):
+    # The optimizer sometimes reports a trial before it finishes (status still
+    # in_progress); the trial keeps running, and the final summary uses its final value.
+    if job_parameters.get("status") != "completed":
+        print('Trial counted early, still running:', job_id, 'epoch', objective_iteration,
+              'objective so far', objective_value)
+        return
     print('Job completed!', job_id, objective_value, objective_iteration, job_parameters)
     if job_id == top_performance_job_id:
         print('WOOT WOOT we broke the record! Objective reached {}'.format(objective_value))
@@ -86,6 +93,22 @@ def build_search_space(args):
     return space
 
 
+def wait_for_trials(controller_id, poll_s=30, timeout_s=1800):
+    """Wait until every trial has finished, so the summary has final values and
+    optimizer.stop() aborts nothing. Gives up after timeout_s (a trial can sit in
+    "queued" forever if its Slurm job died)."""
+    final = {"completed", "failed", "stopped", "closed", "published"}
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        trials = Task.get_tasks(tags=[f"opt: {controller_id}"])
+        running = [t.id for t in trials if t.get_status() not in final]
+        if not running:
+            return
+        print(f"Waiting for {len(running)} trial(s) still running: {running}")
+        time.sleep(poll_s)
+    print("Timed out waiting for trials; summarizing anyway")
+
+
 def main():
     args = parse_args()
     seed = args.seed if args.seed is not None else random.randrange(2**31)
@@ -125,6 +148,7 @@ def main():
     optimizer.start(job_complete_callback=job_complete_callback)
     print("Waiting for hyperparameter optimization to complete.")
     optimizer.wait()
+    wait_for_trials(task.id)
 
     # Summarize every trial, best first, and attach it to the HPO task
     details = optimizer.get_top_experiments_details(top_k=args.total_jobs)
