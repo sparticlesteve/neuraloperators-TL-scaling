@@ -6,10 +6,13 @@ The search space is given on the command line, so an agent can design it:
     python hyperparam_opt.py --base-task-id <id> \\
         --log-uniform General/lr 1e-4 1e-2 \\
         --choice General/batch_size 64 128 256 \\
+        --choice General/max_cosine_lr_epochs 4 8 16 \\
         --total-jobs 6 --max-concurrent 3 --tags round-1
 
 Without any --uniform/--log-uniform/--choice option, it searches General/lr
-log-uniformly between --lr-min and --lr-max.
+log-uniformly between --lr-min and --lr-max. Parameters not searched keep the
+base task's values (e.g. General/max_cosine_lr_epochs, the length of the cosine
+lr schedule).
 """
 import argparse
 import json

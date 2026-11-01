@@ -30,6 +30,9 @@ def parse_args():
     parser.add_argument("--task-name", default="poisson-scale-k1-pod")
     parser.add_argument("--max-epochs", type=int, default=4)
     parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--max-cosine-lr-epochs", type=int, default=4,
+                        help="length of the cosine lr schedule, in epochs (a hyperparameter; "
+                             "the yaml default of 500 means no decay)")
     parser.add_argument("--num-nodes", type=int, default=2)
     parser.add_argument("--tags", nargs="*", default=[])
     return parser.parse_args()
@@ -54,7 +57,7 @@ def main():
         task_name=args.task_name,
         task_type="training",
         repo="https://github.com/sparticlesteve/neuraloperators-TL-scaling.git",
-        branch="clearml-testing",
+        branch="sc26-demo",
         docker="nersc/pytorch:24.08.01",
         docker_bash_setup_script=container_setup_script,
         script="train.py",
@@ -72,6 +75,7 @@ def main():
         #"Args/root_dir": "",
         "lr": args.lr,
         "max_epochs": args.max_epochs,
+        "max_cosine_lr_epochs": args.max_cosine_lr_epochs,
     })
     if args.tags:
         task.add_tags(args.tags)
